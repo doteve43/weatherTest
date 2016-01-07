@@ -57,7 +57,7 @@ public class WeatherActivity extends Activity {
                 if (currentLevel==LEVEL_PROVINCE){
                     selectedProvince = provinceList.get(position);
                     queryCities();
-                }else if (currentLevel==LEVEL_DISTRICT){
+                }else if (currentLevel==LEVEL_CITY){
                     selectedCity=cityList.get(position);
                     queryDistricts();
                 }
@@ -105,7 +105,22 @@ public class WeatherActivity extends Activity {
     }
 
     public void queryDistricts(){
-
+        districtList = weatherDB.loadDistrict(selectedCity.getCityName());
+        if (districtList.size()>0){
+            dataList.clear();
+            for (District district:districtList){
+                if (district.getCityName().equals(selectedCity.getCityName())&& (!district.getDistrictName().equals(selectedCity.getCityName()))){
+                //api会返回district和city名字一样的district，将其去除
+                    dataList.add(district.getDistrictName());
+                }
+            }
+            adapter.notifyDataSetChanged();
+            listView.setSelection(0);
+            titleText.setText("District");
+            currentLevel= LEVEL_DISTRICT;
+        }else {
+            queryFromServer("district");
+        }
     }
 
     private void queryFromServer(final String type){
@@ -119,6 +134,8 @@ public class WeatherActivity extends Activity {
                     Utility.handleProvinceWeatherResponse(response,weatherDB);
                 }else if ("city".equals(type)){
                     Utility.handleCityWeatherResponse(response,weatherDB);
+                }else if ("district".equals(type)){
+                    Utility.handleDistrictWeatherResponse(response,weatherDB);
                 }
 
 
@@ -131,6 +148,8 @@ public class WeatherActivity extends Activity {
                         }
                         else if ("city".equals(type)){
                             queryCities();
+                        }else if ("district".equals(type)){
+                            queryDistricts();
                         }
 
                     }

@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.example.doteve43.weathertest.db.WeatherDB;
 import com.example.doteve43.weathertest.model.City;
+import com.example.doteve43.weathertest.model.District;
 import com.example.doteve43.weathertest.model.Province;
 
 import org.json.JSONArray;
@@ -40,7 +41,7 @@ public class Utility {
                 JSONObject object1 = array.getJSONObject(i);
                 String name = object1.getString("city");
                 String name2 = object1.getString("province");
-                Log.d("handleWeatherResponse", name2);
+                //Log.d("handleWeatherResponse", name2);
                 //将服务器获取的数据存入数据库
                 City city = new City();
                 city.setCityName(name);
@@ -59,14 +60,14 @@ public class Utility {
             JSONArray array = object.getJSONArray("result");
             for (int i=0;i<array.length();i++){
                 JSONObject object1 = array.getJSONObject(i);
-                String name = object1.getString("city");
-                String name2 = object1.getString("province");
-                Log.d("handleWeatherResponse", name2);
+                String name = object1.getString("district");
+                String name2 = object1.getString("city");
+                Log.d("handleWeatherResponse", name);
                 //将服务器获取的数据存入数据库
-                City city = new City();
-                city.setCityName(name);
-                city.setProvinceName(name2);
-                weatherDB.saveCities(city);
+                District district = new District();
+                district.setDistrictName(name);
+                district.setCityName(name2);
+                weatherDB.saveDistrict(district);
 
             }
         }catch (Exception e){
