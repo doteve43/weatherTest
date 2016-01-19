@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -16,6 +17,7 @@ import com.example.doteve43.weathertest.db.WeatherDB;
 import com.example.doteve43.weathertest.model.City;
 import com.example.doteve43.weathertest.model.District;
 import com.example.doteve43.weathertest.model.Province;
+import com.example.doteve43.weathertest.recyclerView.MyAdapter;
 import com.example.doteve43.weathertest.util.HttpCallbackListener;
 import com.example.doteve43.weathertest.util.HttpUtil;
 import com.example.doteve43.weathertest.util.Utility;
@@ -33,8 +35,14 @@ public class ChooserActivity extends Activity {
     private int currentLevel;
     private ListView listView;
     private TextView titleText;
-    private ArrayAdapter<String> adapter;
+    //private ArrayAdapter<String> adapter;
+
+    private MyAdapter adapter;
+
+    private RecyclerView recyclerView;
+
     private List<String> dataList = new ArrayList<>();
+
     private List<Province> provinceList;
     private List<City> cityList;
     private List<District> districtList;
@@ -50,8 +58,11 @@ public class ChooserActivity extends Activity {
         listView = (ListView) findViewById(R.id.list_view);
         titleText = (TextView) findViewById(R.id.title_text);
 
-        adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,dataList);
-        listView.setAdapter(adapter);
+        //adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,dataList);
+        adapter = new MyAdapter(dataList);
+
+
+        //listView.setAdapter(adapter);
         weatherDB = WeatherDB.getInstance(this);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
