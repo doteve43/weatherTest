@@ -1,157 +1,72 @@
 package com.example.doteve43.weathertest.activity;
 
-import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
+import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.doteve43.weathertest.R;
-import com.example.doteve43.weathertest.db.WeatherDB;
-import com.example.doteve43.weathertest.model.City;
-import com.example.doteve43.weathertest.model.District;
-import com.example.doteve43.weathertest.model.Province;
 import com.example.doteve43.weathertest.util.HttpCallbackListener;
 import com.example.doteve43.weathertest.util.HttpUtil;
 import com.example.doteve43.weathertest.util.Utility;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
- * Created by doteve43 on 2016/1/6.
+ * Created by doteve43 on 2016/1/7.
  */
-public class WeatherActivity extends Activity {
-    public static final int LEVEL_PROVINCE = 0;
-    public static final int LEVEL_CITY = 1;
-    public static final int LEVEL_DISTRICT =2;
-    private int currentLevel;
-    private ListView listView;
-    private TextView titleText;
-    private ArrayAdapter<String> adapter;
-    private List<String> dataList = new ArrayList<>();
-    private List<Province> provinceList;
-    private List<City> cityList;
-    private List<District> districtList;
-    private WeatherDB weatherDB;
-    private Province selectedProvince;
-    private City selectedCity;
+public class WeatherActivity extends AppCompatActivity {
+    private TextView title;
+    private TextView weatherTempNow;
+    private String cityName;
+    private TextView dayWeather;
+    private TextView nightWeather;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.choose_area);
-        listView = (ListView) findViewById(R.id.list_view);
-        titleText = (TextView) findViewById(R.id.title_text);
-
-        adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,dataList);
-        listView.setAdapter(adapter);
-        weatherDB = WeatherDB.getInstance(this);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //填写具体逻辑
-                if (currentLevel==LEVEL_PROVINCE){
-                    selectedProvince = provinceList.get(position);
-                    queryCities();
-                }else if (currentLevel==LEVEL_CITY){
-                    selectedCity=cityList.get(position);
-                    queryDistricts();
-                }
-
-            }
-        });
-
-        queryProvince();
+        setContentView(R.layout.weather_layout);
+        //requestWindowFeature(Window.FEATURE_NO_TITLE);
+        weatherTempNow = (TextView) findViewById(R.id.text_temp);
+        dayWeather = (TextView) findViewById(R.id.day_weather);
+        nightWeather = (TextView) findViewById(R.id.night_weather);
+        title = (TextView) findViewById(R.id.weather_city_name);
+        cityName = getIntent().getStringExtra("selectedCityName");
+        title.setText(cityName);
+        queryWeather(cityName);
     }
 
-    private void queryProvince(){
-        provinceList = weatherDB.loadProvinces();
-        if (provinceList.size()>0){
-            dataList.clear();
-            for (Province province:provinceList){
-                dataList.add(province.getProvinceName());
-            }
-            adapter.notifyDataSetChanged();
-            listView.setSelection(0);
-            titleText.setText("China");
-            currentLevel =LEVEL_PROVINCE;
-        }else {
-            queryFromServer("province");
+    /**
+     * 将传入的city名字转码
+     * @param districtName
+     */
+    private void queryWeather(String districtName){
+        String utf = null;
+        try {
+            utf = URLEncoder.encode(districtName,"UTF-8");
+            Log.d("handleWeatherResponse",utf);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
+        String address = "http://op.juhe.cn/onebox/weather/query?cityname="+utf+"&dtype=&key=6405e94cb36025fe5b9c37513f0806aa";
+        //填写queryFromServer
+        queryFromServer(address);
     }
 
-    private void queryCities(){
-        cityList = weatherDB.loadCities(selectedProvince.getProvinceName());
-        if (cityList.size()>0){
-            dataList.clear();
-            for (City city:cityList){
-                if (city.getProvinceName().equals(selectedProvince.getProvinceName())){
-                    dataList.add(city.getCityName());
-                }
-
-            }
-            adapter.notifyDataSetChanged();
-            listView.setSelection(0);
-            titleText.setText("City");
-            currentLevel=LEVEL_CITY;
-        }else {
-            queryFromServer("city");
-        }
-
-    }
-
-    public void queryDistricts(){
-        districtList = weatherDB.loadDistrict(selectedCity.getCityName());
-        if (districtList.size()>0){
-            dataList.clear();
-            for (District district:districtList){
-                if (district.getCityName().equals(selectedCity.getCityName())&& (!district.getDistrictName().equals(selectedCity.getCityName()))){
-                //api会返回district和city名字一样的district，将其去除
-                    dataList.add(district.getDistrictName());
-                }
-            }
-            adapter.notifyDataSetChanged();
-            listView.setSelection(0);
-            titleText.setText("District");
-            currentLevel= LEVEL_DISTRICT;
-        }else {
-            queryFromServer("district");
-        }
-    }
-
-    private void queryFromServer(final String type){
-        String address="http://v.juhe.cn/weather/citys?key=a20ca9eba433167228cb96002ab48f7a";
+    private void queryFromServer(String address){
         HttpUtil.sendHttpRequest(address, new HttpCallbackListener() {
             @Override
             public void onFinish(String response) {
-                //在这里根据返回的内容执行具体操作
-
-                if ("province".equals(type)){
-                    Utility.handleProvinceWeatherResponse(response,weatherDB);
-                }else if ("city".equals(type)){
-                    Utility.handleCityWeatherResponse(response,weatherDB);
-                }else if ("district".equals(type)){
-                    Utility.handleDistrictWeatherResponse(response,weatherDB);
-                }
-
-
-
+                Utility.handleWeatherResponse(WeatherActivity.this,response);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if ("province".equals(type)){
-                            queryProvince();
-                        }
-                        else if ("city".equals(type)){
-                            queryCities();
-                        }else if ("district".equals(type)){
-                            queryDistricts();
-                        }
-
+                        showWeather();
                     }
                 });
             }
@@ -162,4 +77,13 @@ public class WeatherActivity extends Activity {
             }
         });
     }
+
+    private void showWeather(){
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        weatherTempNow.setText(preferences.getString("temp","")+"℃");
+        dayWeather.setText("白天："+preferences.getString("dayWeather",""));
+        nightWeather.setText("夜晚："+preferences.getString("nightWeather",""));
+
+    }
+
 }
