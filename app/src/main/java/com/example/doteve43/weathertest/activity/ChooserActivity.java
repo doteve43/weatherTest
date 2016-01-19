@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.Window;
@@ -33,7 +34,7 @@ public class ChooserActivity extends Activity {
     public static final int LEVEL_CITY = 1;
     public static final int LEVEL_DISTRICT =2;
     private int currentLevel;
-    private ListView listView;
+    //private ListView listView;
     private TextView titleText;
     //private ArrayAdapter<String> adapter;
 
@@ -55,16 +56,19 @@ public class ChooserActivity extends Activity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.choose_area);
-        listView = (ListView) findViewById(R.id.list_view);
+        //listView = (ListView) findViewById(R.id.list_view);
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         titleText = (TextView) findViewById(R.id.title_text);
 
         //adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,dataList);
         adapter = new MyAdapter(dataList);
 
-
         //listView.setAdapter(adapter);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(ChooserActivity.this,LinearLayoutManager.VERTICAL,false));
+
         weatherDB = WeatherDB.getInstance(this);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        /*listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //填写具体逻辑
@@ -79,7 +83,7 @@ public class ChooserActivity extends Activity {
                 }
 
             }
-        });
+        });*/
 
         queryProvince();
     }
@@ -92,7 +96,7 @@ public class ChooserActivity extends Activity {
                 dataList.add(province.getProvinceName());
             }
             adapter.notifyDataSetChanged();
-            listView.setSelection(0);
+            //listView.setSelection(0);
             titleText.setText("China");
             currentLevel =LEVEL_PROVINCE;
         }else {
@@ -111,7 +115,7 @@ public class ChooserActivity extends Activity {
 
             }
             adapter.notifyDataSetChanged();
-            listView.setSelection(0);
+            //listView.setSelection(0);
             titleText.setText("City");
             currentLevel=LEVEL_CITY;
         }else {
@@ -131,7 +135,7 @@ public class ChooserActivity extends Activity {
                 }
             }
             adapter.notifyDataSetChanged();
-            listView.setSelection(0);
+            //listView.setSelection(0);
             titleText.setText("District");
             currentLevel= LEVEL_DISTRICT;
         }else {

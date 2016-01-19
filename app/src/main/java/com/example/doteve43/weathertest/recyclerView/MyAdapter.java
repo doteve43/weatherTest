@@ -1,6 +1,7 @@
 package com.example.doteve43.weathertest.recyclerView;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,7 +9,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.example.doteve43.weathertest.R;
-import com.example.doteve43.weathertest.model.City;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +19,8 @@ import java.util.List;
 public class MyAdapter extends RecyclerView.Adapter{
     private List<String> dataList = new ArrayList<>();
     private String cityNameByDataList;
+
+    private int collected=0;//记录收藏状态，0为不收藏，1为收藏
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -59,7 +61,17 @@ public class MyAdapter extends RecyclerView.Adapter{
         viewHolder.getCollectButton().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                viewHolder.getCollectButton().setImageResource(R.drawable.ic_star_black_18dp);
+                if (collected==0){
+                    viewHolder.getCollectButton().setImageResource(R.drawable.ic_star_black_18dp);
+                    collected=1;
+                    return;
+
+                }else if (collected==1){
+                    viewHolder.getCollectButton().setImageResource(R.drawable.ic_star_border_black_18dp);
+                    collected=0;
+                    return;
+                }
+
             }
         });
     }
