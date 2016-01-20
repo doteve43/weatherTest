@@ -12,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.doteve43.weathertest.R;
 import com.example.doteve43.weathertest.db.WeatherDB;
@@ -46,11 +47,12 @@ public class ChooserActivity extends Activity {
 
     private List<Province> provinceList;
     private List<City> cityList;
-    private List<District> districtList;
+    //private List<District> districtList;
     private WeatherDB weatherDB;
-    private Province selectedProvince;
-    private City selectedCity;
+    //private Province selectedProvince;
+    //private City selectedCity;
     private ProgressDialog progressDialog;
+    private String selectedName;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,9 +67,27 @@ public class ChooserActivity extends Activity {
 
         //listView.setAdapter(adapter);
         recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(ChooserActivity.this,LinearLayoutManager.VERTICAL,false));
+        recyclerView.setLayoutManager(new LinearLayoutManager(ChooserActivity.this, LinearLayoutManager.VERTICAL, false));
 
         weatherDB = WeatherDB.getInstance(this);
+
+        //点击事件
+        adapter.setOnItemClickListener(new MyAdapter.OnRecyclerViewItemClickListener() {
+            @Override
+            public void onItemClick(View view, String data) {
+                selectedName = data;
+                //Toast.makeText(ChooserActivity.this, data, Toast.LENGTH_SHORT).show();
+                if (currentLevel == LEVEL_PROVINCE) {
+                    queryCities(selectedName);
+                } else if (currentLevel == LEVEL_CITY) {
+                    Intent intent = new Intent(ChooserActivity.this, WeatherActivity.class);
+                    intent.putExtra("selectedCityName", selectedName);
+                    startActivity(intent);
+                }
+            }
+        });
+        queryProvince();
+
         /*listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -85,9 +105,11 @@ public class ChooserActivity extends Activity {
             }
         });*/
 
-        queryProvince();
     }
 
+    /**
+     *从数据库中获取province信息，如果没有就去服务器查询
+     */
     private void queryProvince(){
         provinceList = weatherDB.loadProvinces();
         if (provinceList.size()>0){
@@ -104,12 +126,15 @@ public class ChooserActivity extends Activity {
         }
     }
 
-    private void queryCities(){
-        cityList = weatherDB.loadCities(selectedProvince.getProvinceName());
+    /**
+     * 从数据库中获取city信息，如果没有就去服务器中查询
+     */
+    private void queryCities(String heheName){
+        cityList = weatherDB.loadCities(heheName);
         if (cityList.size()>0){
             dataList.clear();
             for (City city:cityList){
-                if (city.getProvinceName().equals(selectedProvince.getProvinceName())){
+                if (city.getProvinceName().equals(heheName)){
                     dataList.add(city.getCityName());
                 }
 
@@ -124,25 +149,11 @@ public class ChooserActivity extends Activity {
 
     }
 
-    public void queryDistricts(){
-        districtList = weatherDB.loadDistrict(selectedCity.getCityName());
-        if (districtList.size()>0){
-            dataList.clear();
-            for (District district:districtList){
-                if (district.getCityName().equals(selectedCity.getCityName())&& (!district.getDistrictName().equals(selectedCity.getCityName()))){
-                //api会返回district和city名字一样的district，将其去除
-                    dataList.add(district.getDistrictName());
-                }
-            }
-            adapter.notifyDataSetChanged();
-            //listView.setSelection(0);
-            titleText.setText("District");
-            currentLevel= LEVEL_DISTRICT;
-        }else {
-            queryFromServer("district");
-        }
-    }
 
+    /**
+     * 从服务器中查询信息
+     * @param type
+     */
     private void queryFromServer(final String type){
         String address="http://v.juhe.cn/weather/citys?key=a20ca9eba433167228cb96002ab48f7a";
         showProgressDialog();
@@ -169,9 +180,7 @@ public class ChooserActivity extends Activity {
                             queryProvince();
                         }
                         else if ("city".equals(type)){
-                            queryCities();
-                        }else if ("district".equals(type)){
-                            queryDistricts();
+                            queryCities(selectedName);
                         }
 
                     }
@@ -212,7 +221,7 @@ public class ChooserActivity extends Activity {
     @Override
     public void onBackPressed() {
         if (currentLevel==LEVEL_DISTRICT){
-            queryCities();
+            queryCities(selectedName);
         }else if (currentLevel==LEVEL_CITY){
             queryProvince();
         }else {

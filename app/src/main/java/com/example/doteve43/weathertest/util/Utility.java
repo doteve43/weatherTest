@@ -13,6 +13,8 @@ import com.example.doteve43.weathertest.model.Province;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.SortedMap;
+
 /**
  * Created by doteve43 on 2016/1/6.
  */
@@ -36,6 +38,12 @@ public class Utility {
             e.printStackTrace();
         }
     }
+
+    /**
+     * 处理服务器返回的city信息
+     * @param response
+     * @param weatherDB
+     */
     public static void handleCityWeatherResponse(String response,WeatherDB weatherDB){
         try {
             JSONObject object = new JSONObject(response);
@@ -89,6 +97,7 @@ public class Utility {
             JSONObject result = object.getJSONObject("result");
             JSONObject data = result.getJSONObject("data");
             JSONObject realtime = data.getJSONObject("realtime");
+            String fabuTime = realtime.getString("time");
             JSONObject weather = realtime.getJSONObject("weather");
 
             JSONArray weatherByTime = data.getJSONArray("weather");
@@ -106,19 +115,72 @@ public class Utility {
             Log.d("TAG",dayWeather+nightWeather);
 
             String temp = weather.getString("temperature");
-            saveWeatherInfo(context, temp,dayWeather,nightWeather);
+            saveWeatherInfo(context, temp,dayWeather,nightWeather,fabuTime);
 
         }catch (Exception e){
             e.printStackTrace();
         }
     }
 
-    public static void saveWeatherInfo(Context context,String temp,String dayWeather,String nightWeather){
+    /**
+     * 将返回的数据存入sharePreferences中
+     * @param context
+     * @param temp
+     * @param dayWeather
+     * @param nightWeather
+     * @param fabuTime
+     */
+    public static void saveWeatherInfo(Context context,String temp,String dayWeather,String nightWeather,String fabuTime){
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         editor.putString("temp",temp);
         editor.putString("dayWeather",dayWeather);
         editor.putString("nightWeather",nightWeather);
+        editor.putString("fabuTime",fabuTime);
         editor.commit();
     }
 
+    public static void handleMoreInfoRequest(Context context,String response){
+        try {
+            JSONObject object = new JSONObject(response);
+
+            JSONObject result = object.getJSONObject("result");
+            JSONObject data = result.getJSONObject("data");
+            JSONArray weatherByTime = data.getJSONArray("weather");
+            for (int i=1;i<weatherByTime.length();i++){
+                JSONObject weatherByDay = weatherByTime.getJSONObject(i);
+                String date = weatherByDay.getString("date");//日期
+                JSONObject info = weatherByDay.getJSONObject("info");
+                JSONArray day = info.getJSONArray("day");
+                JSONArray night = info.getJSONArray("night");
+                String dayHiTemp = day.getString(0);//白天的最高温度
+                String dayLoTemp = day.getString(2);//白天的最低温度
+                String nightHiTemp = night.getString(0);//晚上的最高温度
+                String nightLoTemp = night.getString(2);//晚上的最低气温
+                String dayWeather = day.getString(1);//白天的天气情况
+                String nightWeather = night.getString(1);//晚上的天气情况
+
+                saveSixDayWeatherInfo(context,date,i,dayHiTemp,dayLoTemp,nightHiTemp,nightLoTemp,dayWeather,nightWeather);
+            }
+
+
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+
+
+    public static void saveSixDayWeatherInfo(Context context,String date,int i,String dayHiTemp,String dayLoTemp,String nightHiTemp,String nightLoTemp,String dayWeather,String nightWeather){
+        SharedPreferences.Editor editor = context.getSharedPreferences("sixDayWeatherInfo",0).edit();
+        editor.putString("date"+i,date);
+        editor.putString("dayHiTemp" + i, dayHiTemp);
+        editor.putString("dayTemp"+i,dayLoTemp+"-"+dayHiTemp);
+        editor.putString("dayWeather"+i,dayWeather);
+        editor.putString("nightTemp"+i,nightLoTemp+"-"+nightHiTemp);
+        editor.putString("nightWeather"+i,nightWeather);
+        editor.commit();
+        //Log.d("HandleRequest","date"+i);
+
+    }
 }
