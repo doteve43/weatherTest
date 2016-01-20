@@ -36,7 +36,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="36sp"
-                    android:textColor="#fff"
+                    android:textColor="@color/colorText"
                     android:layout_centerVertical="true"
                     android:layout_centerHorizontal="true" />
 
@@ -44,11 +44,22 @@
                     android:id="@+id/text_temp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#fff"
+                    android:textColor="@color/colorText"
                     android:textSize="36sp"
                     android:layout_centerHorizontal="true"
                     android:layout_marginTop="115dp"
                     android:layout_below="@id/weather_city_name"/>
+
+                <TextView
+                    android:id="@+id/text_fabuTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:textColor="@color/colorText"
+                    android:layout_above="@+id/text_temp"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginRight="8dp"/>
 
 
             </RelativeLayout>
@@ -85,20 +96,26 @@
                         android:textSize="16dp" />
                 </LinearLayout>
 
-
-
-
-
             </LinearLayout>
 
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_below="@id/icon_line"
+                android:layout_height="match_parent">
 
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/particular_weather_msg"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+
+
+                </android.support.v7.widget.RecyclerView>
+
+            </RelativeLayout>
 
 
         </RelativeLayout>
-
-
-
-
 
 
 
