@@ -4,8 +4,16 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -30,7 +38,7 @@ import java.util.List;
 /**
  * Created by doteve43 on 2016/1/6.
  */
-public class ChooserActivity extends Activity {
+public class ChooserActivity extends AppCompatActivity {
     public static final int LEVEL_PROVINCE = 0;
     public static final int LEVEL_CITY = 1;
     public static final int LEVEL_DISTRICT =2;
@@ -53,11 +61,15 @@ public class ChooserActivity extends Activity {
     //private City selectedCity;
     private ProgressDialog progressDialog;
     private String selectedName;
+
+    private SearchView searchView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.choose_area);
+        setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar1);
+        setSupportActionBar(toolbar);
+
         //listView = (ListView) findViewById(R.id.list_view);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         titleText = (TextView) findViewById(R.id.title_text);
@@ -105,6 +117,38 @@ public class ChooserActivity extends Activity {
             }
         });*/
 
+    }
+
+    /**
+     * 创建菜单选项
+     * @param menu
+     * @return
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.menu_main,menu);
+
+        MenuItem searchItem = menu.findItem(R.id.search_view);
+
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                //填写逻辑
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                Log.d("TAG",newText);
+                return false;
+            }
+        });
+
+
+        return super.onCreateOptionsMenu(menu);
     }
 
     /**

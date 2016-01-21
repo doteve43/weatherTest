@@ -27,7 +27,14 @@
                 />
 
             <TextView
-                android:id="@+id/future_day_temp"
+                android:id="@+id/future_week"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"/>
+
+            <TextView
+                android:id="@+id/future_temp"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -40,12 +47,7 @@
                 android:layout_weight="1"
                 android:gravity="center"/>
 
-            <TextView
-                android:id="@+id/future_night_temp"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"/>
+
 
             <TextView
                 android:id="@+id/future_night_weather"

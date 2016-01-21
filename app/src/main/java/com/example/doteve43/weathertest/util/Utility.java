@@ -149,17 +149,16 @@ public class Utility {
             for (int i=1;i<weatherByTime.length();i++){
                 JSONObject weatherByDay = weatherByTime.getJSONObject(i);
                 String date = weatherByDay.getString("date");//日期
+                String week = weatherByDay.getString("week");//星期
                 JSONObject info = weatherByDay.getJSONObject("info");
                 JSONArray day = info.getJSONArray("day");
                 JSONArray night = info.getJSONArray("night");
-                String dayHiTemp = day.getString(0);//白天的最高温度
-                String dayLoTemp = day.getString(2);//白天的最低温度
-                String nightHiTemp = night.getString(0);//晚上的最高温度
-                String nightLoTemp = night.getString(2);//晚上的最低气温
+                String dayTemp = day.getString(2);//白天的最低温度
+                String nightTemp = night.getString(2);//晚上的最低气温
                 String dayWeather = day.getString(1);//白天的天气情况
                 String nightWeather = night.getString(1);//晚上的天气情况
 
-                saveSixDayWeatherInfo(context,date,i,dayHiTemp,dayLoTemp,nightHiTemp,nightLoTemp,dayWeather,nightWeather);
+                saveSixDayWeatherInfo(context,date,i,dayTemp,nightTemp,dayWeather,nightWeather,week);
             }
 
 
@@ -171,16 +170,14 @@ public class Utility {
 
 
 
-    public static void saveSixDayWeatherInfo(Context context,String date,int i,String dayHiTemp,String dayLoTemp,String nightHiTemp,String nightLoTemp,String dayWeather,String nightWeather){
+    public static void saveSixDayWeatherInfo(Context context,String date,int i,String dayTemp,String nightTemp,String dayWeather,String nightWeather,String week){
         SharedPreferences.Editor editor = context.getSharedPreferences("sixDayWeatherInfo",0).edit();
         editor.putString("date"+i,date);
-        editor.putString("dayHiTemp" + i, dayHiTemp);
-        editor.putString("dayTemp"+i,dayLoTemp+"-"+dayHiTemp);
+        editor.putString("Temp"+i,nightTemp+"~"+dayTemp);
         editor.putString("dayWeather"+i,dayWeather);
-        editor.putString("nightTemp"+i,nightLoTemp+"-"+nightHiTemp);
         editor.putString("nightWeather"+i,nightWeather);
+        editor.putString("week"+i,week);
         editor.commit();
-        //Log.d("HandleRequest","date"+i);
 
     }
 }

@@ -21,39 +21,41 @@ public class SixWeatherAdapter extends RecyclerView.Adapter {
 
     class ViewHolder extends RecyclerView.ViewHolder{
         TextView date;
-        TextView futureDayTemp;
+        TextView futureTemp;
         TextView futureDayWeather;
-        TextView futureNightTemp;
         TextView futureNightWeather;
+        TextView futureWeek;
         public ViewHolder(View itemView) {
             super(itemView);
             date = (TextView) itemView.findViewById(R.id.date_info);
-            futureDayTemp = (TextView) itemView.findViewById(R.id.future_day_temp);
+            futureTemp = (TextView) itemView.findViewById(R.id.future_temp);
             futureDayWeather = (TextView) itemView.findViewById(R.id.future_day_weather);
-            futureNightTemp = (TextView) itemView.findViewById(R.id.future_night_temp);
             futureNightWeather = (TextView) itemView.findViewById(R.id.future_night_weather);
+            futureWeek = (TextView) itemView.findViewById(R.id.future_week);
         }
 
         public TextView getDate() {
             return date;
         }
 
-        public TextView getFutureDayTemp() {
-            return futureDayTemp;
+        public TextView getFutureTemp() {
+            return futureTemp;
         }
 
         public TextView getFutureDayWeather() {
             return futureDayWeather;
         }
 
-        public TextView getFutureNightTemp() {
-            return futureNightTemp;
-        }
 
         public TextView getFutureNightWeather() {
             return futureNightWeather;
         }
+
+        public TextView getFutureWeek() {
+            return futureWeek;
+        }
     }
+
 
     /**
      * 自定义构造方法
@@ -73,10 +75,10 @@ public class SixWeatherAdapter extends RecyclerView.Adapter {
         ViewHolder viewHolder = (ViewHolder) holder;
         sixDayWeather = dataList.get(position);
         viewHolder.getDate().setText(sixDayWeather.getDate());
-        viewHolder.getFutureDayTemp().setText(sixDayWeather.getDayTemp());
+        viewHolder.getFutureTemp().setText(sixDayWeather.getDayTemp());
         viewHolder.getFutureDayWeather().setText(sixDayWeather.getDayWeather());
-        viewHolder.getFutureNightTemp().setText(sixDayWeather.getNightTemp());
         viewHolder.getFutureNightWeather().setText(sixDayWeather.getNightWeather());
+        viewHolder.getFutureWeek().setText(sixDayWeather.getWeek());
     }
 
     @Override

@@ -9,6 +9,7 @@ public class SixDayWeather {
     private String nightTemp;
     private String nightWeather;
     private String dayWeather;
+    private String week;
 
     public String getDate() {
         return date;
@@ -48,5 +49,13 @@ public class SixDayWeather {
 
     public void setNightWeather(String nightWeather) {
         this.nightWeather = nightWeather;
+    }
+
+    public String getWeek() {
+        return week;
+    }
+
+    public void setWeek(String week) {
+        this.week = week;
     }
 }

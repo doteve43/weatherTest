@@ -10,7 +10,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -23,7 +26,10 @@ import com.example.doteve43.weathertest.util.Utility;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -31,6 +37,7 @@ import java.util.Locale;
  * Created by doteve43 on 2016/1/7.
  */
 public class WeatherActivity extends AppCompatActivity {
+    private ImageView image;
     private TextView title;
     private TextView weatherTempNow;
     private String cityName;
@@ -49,22 +56,45 @@ public class WeatherActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.weather_layout);
-        //requestWindowFeature(Window.FEATURE_NO_TITLE);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar2);
+        setSupportActionBar(toolbar);
+
+        image = (ImageView) findViewById(R.id.image_pic);
         weatherTempNow = (TextView) findViewById(R.id.text_temp);
         dayWeather = (TextView) findViewById(R.id.day_weather);
         nightWeather = (TextView) findViewById(R.id.night_weather);
         title = (TextView) findViewById(R.id.weather_city_name);
         fabuTime = (TextView) findViewById(R.id.text_fabuTime);
+        //intent传入的名字
         cityName = getIntent().getStringExtra("selectedCityName");
 
         title.setText(cityName);
         queryWeather(cityName);
-
+        //设置recyclerView
         sixDayRecyclerView = (RecyclerView) findViewById(R.id.particular_weather_msg);
         adapter = new SixWeatherAdapter(dateList);
         sixDayRecyclerView.setAdapter(adapter);
         sixDayRecyclerView.setLayoutManager(new LinearLayoutManager(WeatherActivity.this, LinearLayoutManager.HORIZONTAL, false));
 
+    }
+
+    /**
+     * 收藏功能实现（伪
+     * @param menu
+     * @return
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_weather,menu);
+        MenuItem favoriteItem = menu.findItem(R.id.favorite);
+        favoriteItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                item.setIcon(R.drawable.ic_favorite_white_24dp);
+                return false;
+            }
+        });
+        return super.onCreateOptionsMenu(menu);
     }
 
     /**
@@ -110,9 +140,15 @@ public class WeatherActivity extends AppCompatActivity {
 
     private void showWeather(){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean dayORnight = changeBackgroundByTime();
+        if (dayORnight==true){
+            image.setImageResource(R.drawable.day);
+        }else {
+            image.setImageResource(R.drawable.night);
+        }
         weatherTempNow.setText(preferences.getString("temp","")+"℃");
         dayWeather.setText("白天："+preferences.getString("dayWeather",""));
-        nightWeather.setText("夜晚："+preferences.getString("nightWeather",""));
+        nightWeather.setText("夜晚：" + preferences.getString("nightWeather", ""));
         fabuTime.setText("发布于今天" + preferences.getString("fabuTime", ""));
 
     }
@@ -126,10 +162,10 @@ public class WeatherActivity extends AppCompatActivity {
             //6天数据
             SixDayWeather sixDayWeather = new SixDayWeather();
             sixDayWeather.setDate(preferences.getString("date"+i,""));
-            sixDayWeather.setDayTemp("白天温度："+preferences.getString("dayTemp"+i,"")+"℃");
+            sixDayWeather.setDayTemp("温度："+preferences.getString("Temp"+i,"")+"℃");
             sixDayWeather.setDayWeather("白天天气："+preferences.getString("dayWeather"+i,""));
-            sixDayWeather.setNightTemp("夜晚温度："+preferences.getString("nightTemp"+i,"")+"℃");
             sixDayWeather.setNightWeather("夜晚天气："+preferences.getString("nightWeather"+i,""));
+            sixDayWeather.setWeek("周"+preferences.getString("week"+i,""));
             dateList.add(sixDayWeather);
         }
     }
@@ -155,4 +191,17 @@ public class WeatherActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 判断时间，根据时间来换imageView中的图片
+     * @return
+     */
+    private boolean changeBackgroundByTime(){
+        Calendar calendar = Calendar.getInstance();
+        int time = calendar.get(Calendar.HOUR_OF_DAY);
+        if (time>=6 && time<=18){
+            return true;
+        }else {
+            return false;
+        }
+    }
 }

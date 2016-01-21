@@ -19,7 +19,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activity.WeatherActivity">
+        <activity
+            android:name=".activity.WeatherActivity"
+            android:theme="@style/AppTheme.NoActionBar">
 
         </activity>
     </application>
