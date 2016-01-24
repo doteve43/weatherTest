@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -32,6 +33,7 @@ import com.example.doteve43.weathertest.util.HttpCallbackListener;
 import com.example.doteve43.weathertest.util.HttpUtil;
 import com.example.doteve43.weathertest.util.Utility;
 
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +46,6 @@ public class ChooserActivity extends AppCompatActivity {
     public static final int LEVEL_DISTRICT =2;
     private int currentLevel;
     //private ListView listView;
-    private TextView titleText;
     //private ArrayAdapter<String> adapter;
 
     private MyAdapter adapter;
@@ -58,7 +59,7 @@ public class ChooserActivity extends AppCompatActivity {
     //private List<District> districtList;
     private WeatherDB weatherDB;
     //private Province selectedProvince;
-    //private City selectedCity;
+    private City selectedCity;
     private ProgressDialog progressDialog;
     private String selectedName;
 
@@ -72,7 +73,6 @@ public class ChooserActivity extends AppCompatActivity {
 
         //listView = (ListView) findViewById(R.id.list_view);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        titleText = (TextView) findViewById(R.id.title_text);
 
         //adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,dataList);
         adapter = new MyAdapter(dataList);
@@ -94,6 +94,7 @@ public class ChooserActivity extends AppCompatActivity {
                 } else if (currentLevel == LEVEL_CITY) {
                     Intent intent = new Intent(ChooserActivity.this, WeatherActivity.class);
                     intent.putExtra("selectedCityName", selectedName);
+
                     startActivity(intent);
                 }
             }
@@ -131,19 +132,30 @@ public class ChooserActivity extends AppCompatActivity {
 
         MenuItem searchItem = menu.findItem(R.id.search_view);
 
-        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                //填写逻辑
-                return false;
+                //查询数据库中的城市名字
+                List<City> cityList = weatherDB.querySelectedCity(query);
+                dataList.clear();
+                for (City city:cityList){
+                    dataList.add(city.getCityName());
+
+                }
+                if (dataList.size()==0){
+                    Toast.makeText(ChooserActivity.this,"输入有误，请输入需要查询的城市名",Toast.LENGTH_SHORT).show();
+                }
+                adapter.notifyDataSetChanged();
+                currentLevel=LEVEL_CITY;
+                return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 Log.d("TAG",newText);
-                return false;
+                return true;
             }
         });
 
@@ -163,7 +175,6 @@ public class ChooserActivity extends AppCompatActivity {
             }
             adapter.notifyDataSetChanged();
             //listView.setSelection(0);
-            titleText.setText("China");
             currentLevel =LEVEL_PROVINCE;
         }else {
             queryFromServer("province");
@@ -185,7 +196,6 @@ public class ChooserActivity extends AppCompatActivity {
             }
             adapter.notifyDataSetChanged();
             //listView.setSelection(0);
-            titleText.setText("City");
             currentLevel=LEVEL_CITY;
         }else {
             queryFromServer("city");

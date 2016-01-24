@@ -16,8 +16,11 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.doteve43.weathertest.R;
+import com.example.doteve43.weathertest.db.WeatherDB;
+import com.example.doteve43.weathertest.model.City;
 import com.example.doteve43.weathertest.model.SixDayWeather;
 import com.example.doteve43.weathertest.recyclerView.SixWeatherAdapter;
 import com.example.doteve43.weathertest.util.HttpCallbackListener;
@@ -52,12 +55,19 @@ public class WeatherActivity extends AppCompatActivity {
 
     private List<SixDayWeather> dateList = new ArrayList<>();
 
+    private WeatherDB weatherDB;
+
+    private boolean collect;
+
+    private List<City> cityList = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.weather_layout);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar2);
         setSupportActionBar(toolbar);
+
 
         image = (ImageView) findViewById(R.id.image_pic);
         weatherTempNow = (TextView) findViewById(R.id.text_temp);
@@ -67,7 +77,6 @@ public class WeatherActivity extends AppCompatActivity {
         fabuTime = (TextView) findViewById(R.id.text_fabuTime);
         //intent传入的名字
         cityName = getIntent().getStringExtra("selectedCityName");
-
         title.setText(cityName);
         queryWeather(cityName);
         //设置recyclerView
@@ -76,26 +85,61 @@ public class WeatherActivity extends AppCompatActivity {
         sixDayRecyclerView.setAdapter(adapter);
         sixDayRecyclerView.setLayoutManager(new LinearLayoutManager(WeatherActivity.this, LinearLayoutManager.HORIZONTAL, false));
 
+        weatherDB =WeatherDB.getInstance(this);
+
     }
 
     /**
-     * 收藏功能实现（伪
+     * 收藏功能实现
+     * 如果可以获取City实例收藏将更加简单
      * @param menu
      * @return
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_weather,menu);
+        getMenuInflater().inflate(R.menu.menu_weather, menu);
         MenuItem favoriteItem = menu.findItem(R.id.favorite);
+
+        cityList = weatherDB.updateCollectSituation();
+        favoriteItem.setIcon(R.drawable.ic_favorite_border_white_24dp);
+        collect=false;
+
+        for (City city:cityList){
+            Log.d("TAG",city.getCityName());
+            if (cityName.equals(city.getCityName())){
+                favoriteItem.setIcon(R.drawable.ic_favorite_white_24dp);
+                collect =true;
+                break;
+            }
+
+        }
+
         favoriteItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                item.setIcon(R.drawable.ic_favorite_white_24dp);
+                //判断是否收藏
+                if (collect==false){
+
+                    weatherDB.addCollect(cityName);
+                    item.setIcon(R.drawable.ic_favorite_white_24dp);
+                    Toast.makeText(WeatherActivity.this, "收藏成功了喵~",Toast.LENGTH_SHORT).show();
+                    collect=true;
+                    return collect;
+                }
+                else if (collect==true){
+                    weatherDB.deleteCollect(cityName);
+                    item.setIcon(R.drawable.ic_favorite_border_white_24dp);
+                    Toast.makeText(WeatherActivity.this, "取消收藏了喵~",Toast.LENGTH_SHORT).show();
+                    collect=false;
+                    return collect;
+                }
+
                 return false;
             }
         });
         return super.onCreateOptionsMenu(menu);
     }
+
 
     /**
      * 将传入的city名字转码
@@ -138,6 +182,9 @@ public class WeatherActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * 显示weather信息
+     */
     private void showWeather(){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean dayORnight = changeBackgroundByTime();
@@ -204,4 +251,5 @@ public class WeatherActivity extends AppCompatActivity {
             return false;
         }
     }
+
 }

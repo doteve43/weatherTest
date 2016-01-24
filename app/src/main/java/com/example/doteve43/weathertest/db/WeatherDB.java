@@ -52,7 +52,7 @@ public class WeatherDB {
             ContentValues values = new ContentValues();
             values.put("province_name",province.getProvinceName());
             database.insert("Province", null, values);
-            Log.d("handle","insert successful");
+            Log.d("handle", "insert successful");
         }
     }
 
@@ -103,6 +103,7 @@ public class WeatherDB {
                 city.setId(cursor.getInt(cursor.getColumnIndex("id")));
                 city.setCityName(cursor.getString(cursor.getColumnIndex("city_name")));
                 city.setProvinceName(provinceName);
+                city.setCollect(cursor.getString(cursor.getColumnIndex("collected")));
                 list.add(city);
             }while (cursor.moveToNext());
         }
@@ -125,24 +126,65 @@ public class WeatherDB {
     }
 
     /**
-     * 从数据库中读取某city下所有的district
+     * 搜索查询的城市
      */
-    public List<District> loadDistrict(String cityName){
-        List<District> list = new ArrayList<>();
-        Cursor cursor = database.query("District",null,"city_name=?",new String[]{cityName},null,null,null);
+    public List<City> querySelectedCity(String selectedCityName){
+        List<City> list = new ArrayList<>();
+        Cursor cursor= database.query("City",null,"city_name=?", new String[]{selectedCityName},null,null,null);
         if (cursor.moveToFirst()){
             do {
-                District district = new District();
-                district.setId(cursor.getInt(cursor.getColumnIndex("id")));
-                district.setDistrictName(cursor.getString(cursor.getColumnIndex("district_name")));
-                district.setCityName(cityName);
-                list.add(district);
-
+                City city = new City();
+                city.setCityName(selectedCityName);
+                list.add(city);
             }while (cursor.moveToNext());
         }if (cursor!=null){
             cursor.close();
         }
+
         return list;
+    }
+
+    /**
+     * 返回收藏的城市列表
+     */
+    public List<City> updateCollectSituation(){
+
+        List<City> cityList = new ArrayList<>();
+        Cursor cursor = database.query("City",null,"collected=?",new String[]{String.valueOf(1)},null,null,null);
+        if (cursor.moveToFirst()){
+            do {
+                City city = new City();
+                city.setCityName(cursor.getString(cursor.getColumnIndex("city_name")));
+                city.setCollect(cursor.getString(cursor.getColumnIndex("collected")));
+                cityList.add(city);
+            }while (cursor.moveToNext());
+
+        }if (cursor!=null){
+            cursor.close();
+        }
+
+        //更新逻辑
+        return cityList;
+    }
+
+    /**
+     * 添加收藏
+     * @param cityName
+     */
+    public void addCollect(String cityName){
+        ContentValues values = new ContentValues();
+        values.put("collected", 1);
+        database.update("City", values, "city_name=?", new String[]{cityName});
+
+    }
+
+    /**
+     * 删除收藏
+     */
+    public void deleteCollect(String cityName){
+        ContentValues values = new ContentValues();
+        values.put("collected", 0);
+        database.update("City", values, "city_name=?", new String[]{cityName});
     }
 
 

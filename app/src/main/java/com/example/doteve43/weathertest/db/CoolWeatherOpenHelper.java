@@ -19,7 +19,8 @@ public class CoolWeatherOpenHelper extends SQLiteOpenHelper {
     public static final String CREATE_CITY = "create table City ("
             +"id integer primary key autoincrement,"
             +"city_name text UNIQUE,"
-            +"province_name text )";
+            +"province_name text,"
+            +"collected Bit default 0 )";
 
     public static final String CREATE_DISTRICT="create table District ("
             +"id integer primary key autoincrement,"

@@ -7,6 +7,7 @@ public class City {
     private int id;
     private String cityName;
     private String provinceName;
+    private String collect;
 
     public void setId(int id) {
         this.id = id;
@@ -32,4 +33,11 @@ public class City {
         return cityName;
     }
 
+    public String getCollect() {
+        return collect;
+    }
+
+    public void setCollect(String collect) {
+        this.collect = collect;
+    }
 }

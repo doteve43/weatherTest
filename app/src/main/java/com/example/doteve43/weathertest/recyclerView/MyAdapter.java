@@ -32,7 +32,7 @@ public class MyAdapter extends RecyclerView.Adapter implements View.OnClickListe
         public ViewHolder(View root) {
             super(root);
             listCityName = (TextView) root.findViewById(R.id.list_city_name);
-           // collectButton = (ImageButton) root.findViewById(R.id.button_collection);
+
         }
         public TextView getListCityName(){
             return listCityName;
